@@ -22,7 +22,7 @@ async function main() {
     case 'add': {
       const title = args.slice(1).join(' ');
       if (!title) {
-        console.log(chalk.red('Usage: workly add "Task title"'));
+        console.log(chalk.red('Usage: kando add "Task title"'));
         process.exit(1);
       }
       const card = storage.addCard(data, data.boards[0].id, title);
@@ -36,7 +36,7 @@ async function main() {
       const cardId = args[1];
       const column = args[2] as ColumnType;
       if (!cardId || !column) {
-        console.log(chalk.red('Usage: workly move <card-id> <backlog|in-progress|done>'));
+        console.log(chalk.red('Usage: kando move <card-id> <backlog|in-progress|done>'));
         process.exit(1);
       }
       const success = storage.moveCard(data, data.boards[0].id, cardId, column);
@@ -69,7 +69,7 @@ async function main() {
     case 'board': {
       const boardName = args[1];
       if (!boardName) {
-        console.log(chalk.yellow('Usage: workly board <name>'));
+        console.log(chalk.yellow('Usage: kando board <name>'));
         console.log(chalk.gray('Available boards:'));
         data.boards.forEach(b => console.log(`  - ${b.name}`));
         break;
@@ -93,7 +93,7 @@ async function main() {
     case 'delete': {
       const cardId = args[1];
       if (!cardId) {
-        console.log(chalk.red('Usage: workly delete <card-id>'));
+        console.log(chalk.red('Usage: kando delete <card-id>'));
         process.exit(1);
       }
       const success = storage.deleteCard(data, data.boards[0].id, cardId);
@@ -113,7 +113,7 @@ async function main() {
     case 'create-board': {
       const name = args.slice(1).join(' ');
       if (!name) {
-        console.log(chalk.red('Usage: workly create-board "Board Name"'));
+        console.log(chalk.red('Usage: kando create-board "Board Name"'));
         process.exit(1);
       }
       storage.createBoard(data, name);
@@ -140,22 +140,22 @@ async function main() {
 ${chalk.cyan('📋 Workly')} - A minimal kanban CLI for developers
 
 ${chalk.bold('Usage:')}
-  workly                    Start interactive mode
-  workly add "Task"          Add card to backlog
-  workly move <id> <col>     Move card (backlog/in-progress/done)
-  workly delete <id>         Delete a card
-  workly list                List boards and cards
-  workly view                View current board
-  workly boards              List all boards
-  workly create-board "Name" Create new board
-  workly board <name>        Switch to board
-  workly push                Push changes to Git
-  workly pull                Pull changes from Git
+  kando                    Start interactive mode
+  kando add "Task"          Add card to backlog
+  kando move <id> <col>     Move card (backlog/in-progress/done)
+  kando delete <id>         Delete a card
+  kando list                List boards and cards
+  kando view                View current board
+  kando boards              List all boards
+  kando create-board "Name" Create new board
+  kando board <name>        Switch to board
+  kando push                Push changes to Git
+  kando pull                Pull changes from Git
 
 ${chalk.bold('Examples:')}
-  workly add "Fix login bug"
-  workly move abc123 in-progress
-  workly delete xyz789
+  kando add "Fix login bug"
+  kando move abc123 in-progress
+  kando delete xyz789
       `);
       break;
     }
