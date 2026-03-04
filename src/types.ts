@@ -28,7 +28,7 @@ export interface Board {
   createdAt: string;
 }
 
-export interface WorklyData {
+export interface KandoData {
   version: string;
   boards: Board[];
   settings: {

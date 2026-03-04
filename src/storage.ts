@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { WorklyData, Board, Card, ColumnType, Stamp, Label } from './types';
+import { KandoData, Board, Card, ColumnType, Stamp, Label } from './types';
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const DATA_FILE = path.join(DATA_DIR, 'boards.json');
@@ -11,7 +11,7 @@ function ensureDataDir(): void {
   }
 }
 
-function getDefaultData(): WorklyData {
+function getDefaultData(): KandoData {
   return {
     version: '1.0.0',
     boards: [
@@ -33,7 +33,7 @@ export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
 }
 
-export function loadData(): WorklyData {
+export function loadData(): KandoData {
   ensureDataDir();
   if (!fs.existsSync(DATA_FILE)) {
     const data = getDefaultData();
@@ -48,20 +48,20 @@ export function loadData(): WorklyData {
   }
 }
 
-export function saveData(data: WorklyData): void {
+export function saveData(data: KandoData): void {
   ensureDataDir();
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
 
-export function getBoards(data: WorklyData): Board[] {
+export function getBoards(data: KandoData): Board[] {
   return data.boards;
 }
 
-export function getBoard(data: WorklyData, boardId: string): Board | undefined {
+export function getBoard(data: KandoData, boardId: string): Board | undefined {
   return data.boards.find(b => b.id === boardId);
 }
 
-export function createBoard(data: WorklyData, name: string): Board {
+export function createBoard(data: KandoData, name: string): Board {
   const board: Board = {
     id: generateId(),
     name,
@@ -73,7 +73,7 @@ export function createBoard(data: WorklyData, name: string): Board {
   return board;
 }
 
-export function deleteBoard(data: WorklyData, boardId: string): boolean {
+export function deleteBoard(data: KandoData, boardId: string): boolean {
   const index = data.boards.findIndex(b => b.id === boardId);
   if (index !== -1) {
     data.boards.splice(index, 1);
@@ -84,7 +84,7 @@ export function deleteBoard(data: WorklyData, boardId: string): boolean {
 }
 
 export function addCard(
-  data: WorklyData,
+  data: KandoData,
   boardId: string,
   title: string,
   description: string = ''
@@ -109,7 +109,7 @@ export function addCard(
 }
 
 export function moveCard(
-  data: WorklyData,
+  data: KandoData,
   boardId: string,
   cardId: string,
   column: ColumnType
@@ -134,7 +134,7 @@ export function moveCard(
 }
 
 export function updateCard(
-  data: WorklyData,
+  data: KandoData,
   boardId: string,
   cardId: string,
   updates: Partial<Pick<Card, 'title' | 'description' | 'assignee'>>
@@ -153,7 +153,7 @@ export function updateCard(
 }
 
 export function deleteCard(
-  data: WorklyData,
+  data: KandoData,
   boardId: string,
   cardId: string
 ): boolean {
@@ -170,7 +170,7 @@ export function deleteCard(
 }
 
 export function addLabel(
-  data: WorklyData,
+  data: KandoData,
   boardId: string,
   cardId: string,
   label: Label
@@ -190,7 +190,7 @@ export function addLabel(
 }
 
 export function removeLabel(
-  data: WorklyData,
+  data: KandoData,
   boardId: string,
   cardId: string,
   labelName: string

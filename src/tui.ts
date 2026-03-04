@@ -1,10 +1,10 @@
 import chalk from 'chalk';
 import boxen from 'boxen';
 import inquirer from 'inquirer';
-import { WorklyData, Board, Card, ColumnType, COLUMN_LABELS, Label, LABEL_COLORS } from './types';
+import { KandoData, Board, Card, ColumnType, COLUMN_LABELS, Label, LABEL_COLORS } from './types';
 import * as storage from './storage';
 
-export async function mainMenu(data: WorklyData): Promise<void> {
+export async function mainMenu(data: KandoData): Promise<void> {
   while (true) {
     const currentBoard = data.boards[0];
     const answer = await inquirer.prompt([
@@ -66,7 +66,7 @@ export async function mainMenu(data: WorklyData): Promise<void> {
   }
 }
 
-export async function viewBoard(data: WorklyData, board: Board): Promise<void> {
+export async function viewBoard(data: KandoData, board: Board): Promise<void> {
   console.log('\n');
   const cols: ColumnType[] = ['backlog', 'in-progress', 'done'];
   
@@ -116,7 +116,7 @@ function printCard(card: Card, currentUser: string): void {
   }
 }
 
-export async function addCardPrompt(data: WorklyData, board: Board): Promise<void> {
+export async function addCardPrompt(data: KandoData, board: Board): Promise<void> {
   const answers = await inquirer.prompt([
     {
       type: 'input',
@@ -143,7 +143,7 @@ export async function addCardPrompt(data: WorklyData, board: Board): Promise<voi
   console.log(chalk.green(`✅ Card added: "${answers.title}"`));
 }
 
-export async function moveCardPrompt(data: WorklyData, board: Board): Promise<void> {
+export async function moveCardPrompt(data: KandoData, board: Board): Promise<void> {
   const cards = board.cards;
   if (cards.length === 0) {
     console.log(chalk.yellow('No cards to move.'));
@@ -178,7 +178,7 @@ export async function moveCardPrompt(data: WorklyData, board: Board): Promise<vo
   console.log(chalk.green('✅ Card moved!'));
 }
 
-export async function editCardPrompt(data: WorklyData, board: Board): Promise<void> {
+export async function editCardPrompt(data: KandoData, board: Board): Promise<void> {
   const cards = board.cards;
   if (cards.length === 0) {
     console.log(chalk.yellow('No cards to edit.'));
@@ -219,7 +219,7 @@ export async function editCardPrompt(data: WorklyData, board: Board): Promise<vo
   console.log(chalk.green('✅ Card updated!'));
 }
 
-export async function deleteCardPrompt(data: WorklyData, board: Board): Promise<void> {
+export async function deleteCardPrompt(data: KandoData, board: Board): Promise<void> {
   const cards = board.cards;
   if (cards.length === 0) {
     console.log(chalk.yellow('No cards to delete.'));
@@ -249,7 +249,7 @@ export async function deleteCardPrompt(data: WorklyData, board: Board): Promise<
   }
 }
 
-export async function labelCardPrompt(data: WorklyData, board: Board): Promise<void> {
+export async function labelCardPrompt(data: KandoData, board: Board): Promise<void> {
   const cards = board.cards;
   if (cards.length === 0) {
     console.log(chalk.yellow('No cards to label.'));
@@ -319,7 +319,7 @@ export async function labelCardPrompt(data: WorklyData, board: Board): Promise<v
   }
 }
 
-export async function listBoards(data: WorklyData): Promise<void> {
+export async function listBoards(data: KandoData): Promise<void> {
   console.log(chalk.bold.cyan('\n📋 Your Boards:\n'));
   for (const board of data.boards) {
     const total = board.cards.length;
@@ -329,7 +329,7 @@ export async function listBoards(data: WorklyData): Promise<void> {
   console.log('');
 }
 
-export async function createBoardPrompt(data: WorklyData): Promise<void> {
+export async function createBoardPrompt(data: KandoData): Promise<void> {
   const answer = await inquirer.prompt([
     {
       type: 'input',

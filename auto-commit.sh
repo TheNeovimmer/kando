@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Workly Auto-Commit Script
+# Kando Auto-Commit Script
 # Commits and pushes changes to GitHub automatically
 
 REPO_DIR="/home/neovimmer/Documents/workly"
@@ -8,7 +8,7 @@ REMOTE="origin"
 BRANCH="master"
 INTERVAL=60
 
-echo "🚀 Workly auto-commit service started"
+echo "🚀 Kando auto-commit service started"
 echo "   Watching for changes every ${INTERVAL} seconds..."
 
 cd "$REPO_DIR" || exit 1

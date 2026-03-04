@@ -137,7 +137,7 @@ async function main() {
     case '-h':
     default: {
       console.log(`
-${chalk.cyan('📋 Workly')} - A minimal kanban CLI for developers
+${chalk.cyan('📋 Kando')} - A minimal kanban CLI for developers
 
 ${chalk.bold('Usage:')}
   kando                    Start interactive mode
