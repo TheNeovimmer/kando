@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import chalk from 'chalk';
-import * as storage from './storage';
-import { startTUI } from './tui';
+import chalk from "chalk";
+import * as storage from "./storage";
+import { startTUI } from "./tui";
 
 async function main() {
   const args = process.argv.slice(2);
@@ -16,8 +16,8 @@ async function main() {
   const command = args[0];
 
   switch (command) {
-    case 'add': {
-      const title = args.slice(1).join(' ');
+    case "add": {
+      const title = args.slice(1).join(" ");
       if (!title) {
         console.log(chalk.red('Usage: kanbee add "Task title"'));
         process.exit(1);
@@ -30,58 +30,71 @@ async function main() {
       break;
     }
 
-    case 'move': {
+    case "move": {
       const cardId = args[1];
       const columnId = args[2];
       if (!cardId || !columnId) {
-        console.log(chalk.red('Usage: kanbee move <card-id> <column-id>'));
+        console.log(chalk.red("Usage: kanbee move <card-id> <column-id>"));
         process.exit(1);
       }
-      const success = storage.moveCard(data, data.boards[0].id, cardId, columnId);
+      const success = storage.moveCard(
+        data,
+        data.boards[0].id,
+        cardId,
+        columnId,
+      );
       if (success) {
-        console.log(chalk.green('✓ Card moved'));
+        console.log(chalk.green("✓ Card moved"));
       } else {
-        console.log(chalk.red('✗ Card not found'));
+        console.log(chalk.red("✗ Card not found"));
       }
       break;
     }
 
-    case 'list':
-    case 'ls': {
-      console.log(chalk.bold.cyan('\n✦ Kanbee Boards\n'));
+    case "list":
+    case "ls": {
+      console.log(chalk.bold.cyan("\n✦ Kanbee Boards\n"));
       for (const board of data.boards) {
         const total = board.cards.length;
         const cols = board.columns.sort((a, b) => a.order - b.order);
         const lastCol = cols[cols.length - 1];
-        const done = lastCol ? board.cards.filter(c => c.columnId === lastCol.id).length : 0;
-        console.log(`  ${chalk.white(board.name)} ${chalk.gray(`(${done}/${total} done)`)}`);
+        const done = lastCol
+          ? board.cards.filter((c) => c.columnId === lastCol.id).length
+          : 0;
+        console.log(
+          `  ${chalk.white(board.name)} ${chalk.gray(`(${done}/${total} done)`)}`,
+        );
         for (const col of cols) {
-          const cards = board.cards.filter(c => c.columnId === col.id);
-          const icon = col.icon || '●';
-          console.log(`    ${chalk.gray('├─')} ${icon} ${col.name}: ${cards.length}`);
+          const cards = board.cards.filter((c) => c.columnId === col.id);
+          const icon = col.icon || "●";
+          console.log(
+            `    ${chalk.gray("├─")} ${icon} ${col.name}: ${cards.length}`,
+          );
         }
       }
-      console.log('');
+      console.log("");
       break;
     }
 
-    case 'view': {
+    case "view": {
       await startTUI(data);
       break;
     }
 
-    case 'boards': {
-      console.log(chalk.bold.cyan('\n✦ Your Boards\n'));
+    case "boards": {
+      console.log(chalk.bold.cyan("\n✦ Your Boards\n"));
       for (const board of data.boards) {
         const total = board.cards.length;
-        console.log(`  ${chalk.white(board.name)} ${chalk.gray(`(${total} cards, ${board.columns.length} columns)`)}`);
+        console.log(
+          `  ${chalk.white(board.name)} ${chalk.gray(`(${total} cards, ${board.columns.length} columns)`)}`,
+        );
       }
-      console.log('');
+      console.log("");
       break;
     }
 
-    case 'create-board': {
-      const name = args.slice(1).join(' ');
+    case "create-board": {
+      const name = args.slice(1).join(" ");
       if (!name) {
         console.log(chalk.red('Usage: kanbee create-board "Board Name"'));
         process.exit(1);
@@ -91,23 +104,23 @@ async function main() {
       break;
     }
 
-    case 'delete': {
+    case "delete": {
       const cardId = args[1];
       if (!cardId) {
-        console.log(chalk.red('Usage: kanbee delete <card-id>'));
+        console.log(chalk.red("Usage: kanbee delete <card-id>"));
         process.exit(1);
       }
       const success = storage.deleteCard(data, data.boards[0].id, cardId);
       if (success) {
-        console.log(chalk.green('✓ Card deleted'));
+        console.log(chalk.green("✓ Card deleted"));
       } else {
-        console.log(chalk.red('✗ Card not found'));
+        console.log(chalk.red("✗ Card not found"));
       }
       break;
     }
 
-    case 'add-column': {
-      const colName = args.slice(1).join(' ');
+    case "add-column": {
+      const colName = args.slice(1).join(" ");
       if (!colName) {
         console.log(chalk.red('Usage: kanbee add-column "Column Name"'));
         process.exit(1);
@@ -117,19 +130,19 @@ async function main() {
       break;
     }
 
-    case 'data-path': {
+    case "data-path": {
       console.log(storage.getDataPath());
       break;
     }
 
-    case 'help':
-    case '--help':
-    case '-h':
+    case "help":
+    case "--help":
+    case "-h":
     default: {
       console.log(`
-${chalk.hex('#e0af68')('✦')} ${chalk.bold.hex('#7aa2f7')('Kanbee')} — terminal kanban board
+${chalk.hex("#e0af68")("✦")} ${chalk.bold.hex("#7aa2f7")("Kanbee")} — terminal kanban board
 
-${chalk.bold('Usage:')}
+${chalk.bold("Usage:")}
   kanbee                       Launch interactive TUI
   kanbee add "Task"            Add card to first column
   kanbee move <id> <col-id>    Move card to column
@@ -141,7 +154,7 @@ ${chalk.bold('Usage:')}
   kanbee add-column "Name"     Add column to current board
   kanbee data-path             Show data file path
 
-${chalk.bold('TUI Keys:')}
+${chalk.bold("TUI Keys:")}
   h/j/k/l  Navigate columns and cards
   n        New card (title → description)
   Enter    Open card detail
@@ -152,7 +165,13 @@ ${chalk.bold('TUI Keys:')}
   A        Add column
   R        Rename column
   X        Delete column
+  t        Change theme
   q        Quit
+
+${chalk.bold("Theme Selection:")}
+  j/k      Navigate themes
+  Enter    Apply selected theme
+  Esc      Cancel
       `);
       break;
     }
