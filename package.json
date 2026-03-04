@@ -1,7 +1,7 @@
 {
   "name": "@theneovimmer/kando",
   "version": "2.0.0",
-  "description": "A beautiful terminal kanban board built with OpenTUI React",
+  "description": "KanFlow — a keyboard-driven terminal kanban board with Vim navigation",
   "main": "dist/index.js",
   "bin": {
     "kando": "dist/index.js"
@@ -16,9 +16,10 @@
     "kanban",
     "cli",
     "tui",
-    "react",
-    "opentui",
-    "productivity"
+    "terminal",
+    "vim",
+    "productivity",
+    "kanflow"
   ],
   "author": "TheNeovimmer",
   "repository": {
@@ -28,13 +29,10 @@
   "homepage": "https://github.com/TheNeovimmer/kando#readme",
   "license": "MIT",
   "dependencies": {
-    "@opentui/react": "latest",
-    "chalk": "^4.1.2",
-    "react": "^19.0.0"
+    "chalk": "^4.1.2"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
-    "@types/react": "^19.0.0",
     "typescript": "^5.3.2",
     "ts-node": "^10.9.2"
   }

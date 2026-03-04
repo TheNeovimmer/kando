@@ -1,18 +1,15 @@
 #!/usr/bin/env node
 
 import chalk from 'chalk';
-import inquirer from 'inquirer';
 import * as storage from './storage';
-import * as tui from './tui';
-import { ColumnType } from './types';
+import { startTUI } from './tui';
 
 async function main() {
   const args = process.argv.slice(2);
   const data = storage.loadData();
 
   if (args.length === 0) {
-    tui.printBanner();
-    await tui.mainMenu(data);
+    await startTUI(data);
     return;
   }
 
@@ -25,68 +22,72 @@ async function main() {
         console.log(chalk.red('Usage: kando add "Task title"'));
         process.exit(1);
       }
-      const card = storage.addCard(data, data.boards[0].id, title);
+      const board = data.boards[0];
+      const card = storage.addCard(data, board.id, title);
       if (card) {
-        console.log(chalk.green(`✅ Card added: "${title}"`));
+        console.log(chalk.green(`✓ Card added: "${title}"`));
       }
       break;
     }
 
     case 'move': {
       const cardId = args[1];
-      const column = args[2] as ColumnType;
-      if (!cardId || !column) {
-        console.log(chalk.red('Usage: kando move <card-id> <backlog|in-progress|done>'));
+      const columnId = args[2];
+      if (!cardId || !columnId) {
+        console.log(chalk.red('Usage: kando move <card-id> <column-id>'));
         process.exit(1);
       }
-      const success = storage.moveCard(data, data.boards[0].id, cardId, column);
+      const success = storage.moveCard(data, data.boards[0].id, cardId, columnId);
       if (success) {
-        console.log(chalk.green('✅ Card moved!'));
+        console.log(chalk.green('✓ Card moved'));
       } else {
-        console.log(chalk.red('❌ Card not found'));
+        console.log(chalk.red('✗ Card not found'));
       }
       break;
     }
 
     case 'list':
     case 'ls': {
-      console.log(chalk.bold.cyan('\n📋 Your Boards:\n'));
+      console.log(chalk.bold.cyan('\n✦ KanFlow Boards\n'));
       for (const board of data.boards) {
         const total = board.cards.length;
-        const done = board.cards.filter(c => c.column === 'done').length;
+        const cols = board.columns.sort((a, b) => a.order - b.order);
+        const lastCol = cols[cols.length - 1];
+        const done = lastCol ? board.cards.filter(c => c.columnId === lastCol.id).length : 0;
         console.log(`  ${chalk.white(board.name)} ${chalk.gray(`(${done}/${total} done)`)}`);
-        for (const col of ['backlog', 'in-progress', 'done'] as ColumnType[]) {
-          const cards = board.cards.filter(c => c.column === col);
-          if (cards.length > 0) {
-            console.log(`    ${chalk.gray('├─')} ${col}: ${cards.length}`);
-          }
+        for (const col of cols) {
+          const cards = board.cards.filter(c => c.columnId === col.id);
+          const icon = col.icon || '●';
+          console.log(`    ${chalk.gray('├─')} ${icon} ${col.name}: ${cards.length}`);
         }
       }
       console.log('');
       break;
     }
 
-    case 'board': {
-      const boardName = args[1];
-      if (!boardName) {
-        console.log(chalk.yellow('Usage: kando board <name>'));
-        console.log(chalk.gray('Available boards:'));
-        data.boards.forEach(b => console.log(`  - ${b.name}`));
-        break;
-      }
-      const board = data.boards.find(b => b.name.toLowerCase() === boardName.toLowerCase());
-      if (board) {
-        tui.printBanner();
-        await tui.mainMenu(data);
-      } else {
-        console.log(chalk.red(`Board "${boardName}" not found`));
-      }
+    case 'view': {
+      await startTUI(data);
       break;
     }
 
-    case 'view': {
-      const board = data.boards[0];
-      await tui.viewBoard(data, board);
+    case 'boards': {
+      console.log(chalk.bold.cyan('\n✦ Your Boards\n'));
+      for (const board of data.boards) {
+        const total = board.cards.length;
+        console.log(`  ${chalk.white(board.name)} ${chalk.gray(`(${total} cards, ${board.columns.length} columns)`)}`);
+      }
+      console.log('');
+      break;
+    }
+
+    case 'create-board': {
+      const name = args.slice(1).join(' ');
+      if (!name) {
+        console.log(chalk.red('Usage: kando create-board "Board Name"'));
+        process.exit(1);
+      }
+      storage.createBoard(data, name);
+      console.log(chalk.green(`✓ Board "${name}" created`));
       break;
     }
 
@@ -98,37 +99,26 @@ async function main() {
       }
       const success = storage.deleteCard(data, data.boards[0].id, cardId);
       if (success) {
-        console.log(chalk.green('✅ Card deleted!'));
+        console.log(chalk.green('✓ Card deleted'));
       } else {
-        console.log(chalk.red('❌ Card not found'));
+        console.log(chalk.red('✗ Card not found'));
       }
       break;
     }
 
-    case 'boards': {
-      await tui.listBoards(data);
-      break;
-    }
-
-    case 'create-board': {
-      const name = args.slice(1).join(' ');
-      if (!name) {
-        console.log(chalk.red('Usage: kando create-board "Board Name"'));
+    case 'add-column': {
+      const colName = args.slice(1).join(' ');
+      if (!colName) {
+        console.log(chalk.red('Usage: kando add-column "Column Name"'));
         process.exit(1);
       }
-      storage.createBoard(data, name);
-      console.log(chalk.green(`✅ Board "${name}" created!`));
+      storage.addColumn(data, data.boards[0].id, colName);
+      console.log(chalk.green(`✓ Column "${colName}" added`));
       break;
     }
 
-    case 'push': {
-      console.log(chalk.yellow('Pushing to Git...'));
-      console.log(chalk.gray('(Configure git remote first: git remote add origin <url>)'));
-      break;
-    }
-
-    case 'pull': {
-      console.log(chalk.yellow('Pulling from Git...'));
+    case 'data-path': {
+      console.log(storage.getDataPath());
       break;
     }
 
@@ -137,25 +127,32 @@ async function main() {
     case '-h':
     default: {
       console.log(`
-${chalk.cyan('📋 Kando')} - A minimal kanban CLI for developers
+${chalk.hex('#e0af68')('✦')} ${chalk.bold.hex('#7aa2f7')('KanFlow')} — terminal kanban board
 
 ${chalk.bold('Usage:')}
-  kando                    Start interactive mode
-  kando add "Task"          Add card to backlog
-  kando move <id> <col>     Move card (backlog/in-progress/done)
-  kando delete <id>         Delete a card
-  kando list                List boards and cards
-  kando view                View current board
-  kando boards              List all boards
-  kando create-board "Name" Create new board
-  kando board <name>        Switch to board
-  kando push                Push changes to Git
-  kando pull                Pull changes from Git
+  kando                       Launch interactive TUI
+  kando add "Task"            Add card to first column
+  kando move <id> <col-id>    Move card to column
+  kando delete <id>           Delete a card
+  kando list                  List boards with columns
+  kando view                  Open TUI board view
+  kando boards                List all boards
+  kando create-board "Name"   Create new board
+  kando add-column "Name"     Add column to current board
+  kando data-path             Show data file path
 
-${chalk.bold('Examples:')}
-  kando add "Fix login bug"
-  kando move abc123 in-progress
-  kando delete xyz789
+${chalk.bold('TUI Keys:')}
+  h/j/k/l  Navigate columns and cards
+  n        New card (title → description)
+  Enter    Open card detail
+  Tab      Cycle detail fields
+  i/Enter  Edit field inline
+  m/M      Move card forward/backward
+  d        Delete card
+  A        Add column
+  R        Rename column
+  X        Delete column
+  q        Quit
       `);
       break;
     }
