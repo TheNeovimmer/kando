@@ -1,54 +1,48 @@
 # Contributing to Kando
 
-First off, thank you for considering contributing to Kando! It's people like you that make it a great tool.
+Kando is a community-driven project. We invite technical contributions that align with our core philosophy of minimalism and terminal-first efficiency.
 
-## Code of Conduct
+## Standards and Conduct
 
-Help us keep the Kando community open and inclusive. Be respectful, kind, and professional.
+We expect all contributors to maintain a professional and technical discourse. Submissions should be clear, well-reasoned, and respectful of the project's architectural constraints.
 
-## How Can I Contribute?
+## Technical Contribution Workflow
 
-### Reporting Bugs
+### Error Reporting
 
-- Always search for existing issues first.
-- If you find a bug, open an issue with a clear title and description.
-- Include steps to reproduce and your environment details.
+Before opening an issue, please verify that the behavior is not already documented or addressed in existing discussions. When reporting an error, provide a comprehensive description, including environment specifications and a minimal set of reproduction steps.
 
-### Suggesting Enhancements
+### Enhancement Proposals
 
-- Open an issue titled "[Feature Request] Your idea".
-- Describe the problem it solves and how you think it should work.
+Proposals for new features should focus on solving specific developer friction points without introducing unnecessary complexity. Please initiate a discussion via an issue before commencing significant implementation work.
 
-### Pull Requests
+### Submission Process
 
-1. **Fork** the repository and create your branch from `master`.
-2. **Setup** the environment: `npm install`.
-3. **Make your changes**. Ensure your code follows the existing style.
-4. **Test** your changes: `npm run dev`.
-5. **Commit** with descriptive messages.
-6. **Submit** your Pull Request!
+1. Fork the Repository: Create a personal fork and establish a feature branch from the master branch.
+2. Environment Setup: Initialize the project dependencies using `npm install`.
+3. Development: Implement changes following the established coding patterns and ensuring no regressions are introduced.
+4. Validation: Verify that the project builds successfully and passes all internal checks.
+5. Pull Request: Provide a detailed summary of the changes and the rationale behind the implementation.
 
-## Development Setup
+## Development Environment
 
 ```bash
-# Clone your fork
-git clone https://github.com/YOUR_USERNAME/kando.git
+# Clone the repository
+git clone https://github.com/TheNeovimmer/kando.git
 cd kando
 
-# Install dependencies
+# Synchronization of dependencies
 npm install
 
-# Run in development mode
+# Live development execution
 npm run dev
 
-# Build the project
+# Production build verification
 npm run build
 ```
 
-## Pull Request Guidelines
+## Review Guidelines
 
-- Keep your PRs focused on a single change.
-- Update documentation if you're adding or changing features.
-- Ensure the project builds successfully (`npm run build`).
+All pull requests will be reviewed for code quality, adherence to the project's minimalist aesthetic, and technical correctness. We value precision and clarity over volume.
 
-Thank you for your contributions!
+Thank you for contributing to the Kando ecosystem.

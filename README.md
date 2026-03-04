@@ -1,77 +1,78 @@
-![Kando Banner](/home/neovimmer/.gemini/antigravity/brain/66dddaff-1fec-48f5-8527-6dd8ad00e53d/kando_banner_1772659579561.png)
-
 # Kando
 
-> A minimal, beautiful kanban CLI for developers and teams.
+Kando is a minimalist, terminal-native Kanban utility engineered for developers who value speed, precision, and local ownership of their workflow. It eliminates the cognitive overhead of web-based project management tools by providing an interface that resides directly within the development environment.
 
-Kando is designed for developers who live in the terminal. No heavy web interfaces, no complex cloud setups—just a fast, intuitive, and Git-integrated kanban board that lives right alongside your code.
+## Philosophy
 
-## ✨ Features
+Kando is built upon the principle that task management should be an extension of the development process, not a departure from it. By leveraging a local-first data model and seamless Git integration, Kando ensures that your project's progress is versioned alongside its source code.
 
-- ⚡️ **Lightweight & Fast**: Zero-latency interactions.
-- 📋 **Intuitive TUI**: Interactive terminal interface for managing your flow.
-- 🔄 **Git-Integrated**: Auto-commit and push your task changes to keep your team in sync.
-- 🎨 **Beautiful Aesthetics**: Rich colors and a clean layout powered by `chalk` and `boxen`.
-- 📦 **Simple Storage**: Local JSON-based data that you own.
+## Core Features
 
-## 🚀 Quick Start
+- Terminal-Native Interface: A high-performance interactive text user interface (TUI) optimized for rapid data entry and manipulation.
+- Git Synchronization: Integrated synchronization mechanisms that allow for automated tracking of project state across distributed teams.
+- Local Sovereignty: All data is stored in standard JSON format within the repository, ensuring complete offline availability and data portability.
+- Extensible Design: Modular architecture focused on simplicity and clarity, making it easy to integrate into custom development pipelines.
 
-### Installation
+## Installation
+
+Identify the project directory and install the package via the Node Package Manager:
 
 ```bash
 npm install -g kando
 ```
 
-### Usage
+## Operation
 
-Simply run `kando` to enter the interactive mode:
+Enter the interactive TUI by executing the primary command:
 
 ```bash
 kando
 ```
 
-Or use the CLI directly:
+### Direct Command Interface
+
+For non-interactive operations, Kando provides a suite of direct subcommands:
 
 ```bash
-# Add a new task to the backlog
-kando add "Refactor storage layer"
+# Append a new card to the project backlog
+kando add "Implement storage abstraction"
 
-# Move a card to "in-progress"
-kando move <card-id> in-progress
+# Transition a card between workflow columns
+kando move <card-id> <backlog | in-progress | done>
 
-# List all cards on your board
+# Review board status in a structured list
 kando list
 
-# Push changes to your configured remote
+# Synchronize local state with the remote repository
 kando push
 ```
 
-## 🛠 Commands
+## Technical Reference
 
-| Command                     | Description                            |
-| --------------------------- | -------------------------------------- |
-| `kando`                     | Start interactive mode                 |
-| `kando add "Task"`          | Add a card to the backlog              |
-| `kando move <id> <col>`     | Move a card (backlog/in-progress/done) |
-| `kando delete <id>`         | Delete a card                          |
-| `kando list`                | List boards and current cards          |
-| `kando view`                | Interactive board view                 |
-| `kando boards`              | List all boards                        |
-| `kando create-board "Name"` | Create a new board                     |
-| `kando push`                | Sync changes to Git                    |
+| Command               | Definition                                             |
+| --------------------- | ------------------------------------------------------ |
+| kando                 | Initializes the interactive management suite.          |
+| kando add [title]     | Constructs a new card within the primary board.        |
+| kando move [id] [col] | Displaces a card to the specified workflow pillar.     |
+| kando delete [id]     | Removes a card from the persistent store.              |
+| kando list            | Renders a summary of all active boards and cards.      |
+| kando view            | Displays a static snapshot of the current board state. |
+| kando boards          | Enumerates all initialized boards.                     |
+| kando create-board    | Initializes a new board configuration.                 |
+| kando push            | Executes the configured Git synchronization routine.   |
 
-## ⚙️ Configuration
+## Data Persistence
 
-Kando stores your data in your project's local directory under `./data/boards.json`. This makes it easy to version control your tasks alongside your code.
+Kando maintains state within `./data/boards.json`. This approach ensures that your Kanban board follows the same branching and merging logic as your codebase, providing a unified history of both code and intent.
 
-## 🤝 Contributing
+## Contributions
 
-Contributions are welcome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+Technical contributions are welcome. Please refer to the formal contributing guidelines for details on the development workflow and coding standards.
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+This software is distributed under the MIT License. Detailed terms are available in the LICENSE file.
 
 ---
 
-Built with ☕️ by [TheNeovimmer](https://github.com/TheNeovimmer)
+Maintained by [TheNeovimmer](https://github.com/TheNeovimmer)
