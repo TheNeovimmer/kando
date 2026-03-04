@@ -345,7 +345,7 @@ export async function createBoardPrompt(data: WorklyData): Promise<void> {
 
 export function printBanner(): void {
   const banner = boxen(
-    chalk.cyan('📋  Workly') + '\n\n' + 
+    chalk.cyan('📋  Kando') + '\n\n' + 
     chalk.gray('A minimal kanban for devs'),
     {
       padding: 1,
