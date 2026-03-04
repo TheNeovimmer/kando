@@ -5,7 +5,7 @@
 
 REPO_DIR="/home/neovimmer/Documents/workly"
 REMOTE="origin"
-BRANCH="main"
+BRANCH="master"
 INTERVAL=60
 
 echo "🚀 Workly auto-commit service started"
