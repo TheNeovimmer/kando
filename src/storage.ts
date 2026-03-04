@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { WorklyData, Board, Card, ColumnType, Stamp, Label } from './types';
 
-const DATA_DIR = path.join(process.env.HOME || process.env.USERPROFILE || '.', '.workly');
+const DATA_DIR = path.join(__dirname, '..', 'data');
 const DATA_FILE = path.join(DATA_DIR, 'boards.json');
 
 function ensureDataDir(): void {
