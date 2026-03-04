@@ -1,0 +1,35 @@
+{
+  "name": "workly",
+  "version": "1.0.0",
+  "description": "A minimal, beautiful kanban CLI for developers and teams",
+  "main": "dist/index.js",
+  "bin": {
+    "workly": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "prepublish": "npm run build"
+  },
+  "keywords": [
+    "kanban",
+    "cli",
+    "task",
+    "board",
+    "productivity"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "inquirer": "^8.2.5",
+    "boxen": "^5.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/inquirer": "^8.2.10",
+    "typescript": "^5.3.2",
+    "ts-node": "^10.9.2"
+  }
+}
