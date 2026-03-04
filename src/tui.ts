@@ -6,10 +6,24 @@ import {
   Column,
   CARD_ICONS,
   KanbeeData,
+  ColorMode,
+  CustomTheme,
 } from "./types";
 import { parseKeypress, isPrintable } from "./input";
 import { render, enterAltScreen, leaveAltScreen, hideCursor } from "./renderer";
-import { getThemeColors, getAvailableThemes, TerminalName } from "./theme";
+import {
+  getThemeColors,
+  getAvailableThemes,
+  TerminalName,
+  createCustomTheme,
+  updateCustomTheme,
+  applyColorMode,
+  mergeThemeWithOverrides,
+  applyColorOverrides,
+  getThemePreviewColors,
+  exportThemeAsJson,
+  importThemeFromJson,
+} from "./theme";
 import * as storage from "./storage";
 
 // ─── State ────────────────────────────────────────────────────────────────────
@@ -38,6 +52,11 @@ function initState(data: KanbeeData): void {
     creationStep: 0,
     creationTitle: "",
     themeSelectIndex: 0,
+    themeEditorMode: null,
+    themeEditorField: 0,
+    selectedCustomTheme: null,
+    previewThemeIndex: 0,
+    previewColorMode: data.settings.colorMode || "auto",
   };
   theme = getThemeColors(data.settings.theme);
   clampSelection();
@@ -149,6 +168,153 @@ function handleThemeSelectKey(key: string): void {
       showMessage(`✓ Theme changed to ${selectedTheme}`);
       break;
     }
+    case "c": {
+      // Create new custom theme
+      const availableThemes = getAvailableThemes();
+      state.themeEditorMode = "create";
+      state.mode = "THEME_EDITOR";
+      enterPrompt("Custom theme name", (name) => {
+        if (name.trim()) {
+          const selectedTheme = availableThemes[state.themeSelectIndex];
+          const newTheme = createCustomTheme(
+            name.trim(),
+            selectedTheme,
+            state.previewColorMode,
+          );
+          if (!state.data.settings.customThemes) {
+            state.data.settings.customThemes = [];
+          }
+          state.data.settings.customThemes.push(newTheme);
+          storage.saveData(state.data);
+          state.selectedCustomTheme = newTheme;
+          state.themeEditorMode = "edit";
+          showMessage(`✓ Theme "${name.trim()}" created`);
+        }
+        exitPrompt();
+      });
+      break;
+    }
+    case "p": {
+      // Preview theme
+      state.mode = "THEME_PREVIEW";
+      state.previewThemeIndex = state.themeSelectIndex;
+      break;
+    }
+    case "escape":
+    case "q":
+      state.mode = "NORMAL";
+      break;
+    case "C-c":
+      cleanup();
+      process.exit(0);
+      break;
+  }
+}
+
+function handleThemeEditorKey(key: string): void {
+  switch (key) {
+    case "escape":
+    case "q":
+      state.themeEditorMode = null;
+      state.selectedCustomTheme = null;
+      state.mode = "NORMAL";
+      break;
+    case "j":
+    case "down":
+      state.themeEditorField = (state.themeEditorField + 1) % 10;
+      break;
+    case "k":
+    case "up":
+      state.themeEditorField = (state.themeEditorField - 1 + 10) % 10;
+      break;
+    case "return":
+    case "i":
+      if (state.selectedCustomTheme) {
+        enterPrompt("Color value (hex format #RRGGBB)", (value) => {
+          if (state.selectedCustomTheme) {
+            const colorFields = [
+              "primary",
+              "secondary",
+              "accent",
+              "muted",
+              "border",
+              "card",
+              "highlight",
+              "bg",
+              "headerBg",
+              "statusBg",
+            ];
+            const field = colorFields[state.themeEditorField];
+            if (/^#[0-9a-fA-F]{6}$/.test(value)) {
+              state.selectedCustomTheme.colors[field as keyof ThemeColors] =
+                value;
+              state.selectedCustomTheme = updateCustomTheme(
+                state.selectedCustomTheme,
+                {},
+              );
+              const customThemes = state.data.settings.customThemes || [];
+              const idx = customThemes.findIndex(
+                (t) => t.id === state.selectedCustomTheme?.id,
+              );
+              if (idx >= 0) {
+                customThemes[idx] = state.selectedCustomTheme;
+              }
+              state.data.settings.customThemes = customThemes;
+              storage.saveData(state.data);
+              showMessage("✓ Color updated");
+            } else {
+              showMessage("✗ Invalid hex color format");
+            }
+          }
+          exitPrompt();
+        });
+      }
+      break;
+    case "C-c":
+      cleanup();
+      process.exit(0);
+      break;
+  }
+}
+
+function handleThemePreviewKey(key: string): void {
+  const themes = getAvailableThemes();
+
+  switch (key) {
+    case "j":
+    case "down":
+      state.previewThemeIndex = (state.previewThemeIndex + 1) % themes.length;
+      break;
+    case "k":
+    case "up":
+      state.previewThemeIndex =
+        (state.previewThemeIndex - 1 + themes.length) % themes.length;
+      break;
+    case "l":
+    case "right":
+      // Cycle color mode
+      const modes: ColorMode[] = ["auto", "light", "dark"];
+      const currentIdx = modes.indexOf(state.previewColorMode);
+      state.previewColorMode = modes[(currentIdx + 1) % modes.length];
+      break;
+    case "h":
+    case "left":
+      // Reverse cycle color mode
+      const modes2: ColorMode[] = ["auto", "light", "dark"];
+      const currentIdx2 = modes2.indexOf(state.previewColorMode);
+      state.previewColorMode =
+        modes2[(currentIdx2 - 1 + modes2.length) % modes2.length];
+      break;
+    case "return":
+    case " ": {
+      const selectedTheme = themes[state.previewThemeIndex];
+      state.data.settings.theme = selectedTheme;
+      state.data.settings.colorMode = state.previewColorMode;
+      storage.saveData(state.data);
+      theme = getThemePreviewColors(selectedTheme, state.previewColorMode);
+      state.mode = "NORMAL";
+      showMessage(`✓ Theme & mode applied`);
+      break;
     case "escape":
     case "q":
       state.mode = "NORMAL";
@@ -580,6 +746,12 @@ export async function startTUI(data: KanbeeData): Promise<void> {
           break;
         case "THEME_SELECT":
           handleThemeSelectKey(key);
+          break;
+        case "THEME_EDITOR":
+          handleThemeEditorKey(key);
+          break;
+        case "THEME_PREVIEW":
+          handleThemePreviewKey(key);
           break;
       }
 
