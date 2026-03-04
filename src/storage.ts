@@ -61,7 +61,7 @@ function migrateData(raw: any): KanbeeData {
   // Remove old settings.columns if present
   delete raw.settings.columns;
   // Update version
-  raw.version = "1.0.0";
+  raw.version = "1.1.0";
   return raw as KanbeeData;
 }
 
@@ -69,7 +69,7 @@ function migrateData(raw: any): KanbeeData {
 
 function getDefaultData(): KanbeeData {
   return {
-    version: "1.0.0",
+    version: "1.1.0",
     boards: [
       {
         id: generateId(),
