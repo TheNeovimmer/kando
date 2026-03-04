@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { KandoData, Board, Card, ColumnType, Stamp, Label } from './types';
+import { KandoData, Board, Card, ColumnType, Stamp, Label, DEFAULT_COLUMNS } from './types';
 
 import * as os from 'os';
 
@@ -68,6 +68,7 @@ export function createBoard(data: KandoData, name: string): Board {
   const board: Board = {
     id: generateId(),
     name,
+    columns: [...DEFAULT_COLUMNS],
     cards: [],
     createdAt: new Date().toISOString()
   };
@@ -99,7 +100,7 @@ export function addCard(
     id: generateId(),
     title,
     description,
-    column: 'backlog',
+    columnId: 'backlog',
     labels: [],
     created: {
       by: data.settings.user,
@@ -123,7 +124,7 @@ export function moveCard(
   const card = board.cards.find(c => c.id === cardId);
   if (!card) return false;
 
-  card.column = column;
+  card.columnId = column;
   if (column === 'done' && !card.completed) {
     card.completed = {
       by: data.settings.user,
