@@ -282,4 +282,141 @@ Board state is stored in `./data/boards.json`. The file uses standard JSON forma
           "title": "Implement JWT authentication",
           "description": "Add JWT-based authentication to API endpoints with refresh token support",
           "columnId": "in-progress",
-          "icon": "
+          "icon": "◆",
+          "assignee": "alice@example.com",
+          "labels": [
+            {
+              "name": "backend",
+              "color": "blue"
+            }
+          ],
+          "created": {
+            "by": "alice",
+            "at": "2024-01-15T10:30:00Z"
+          },
+          "completed": {
+            "by": "alice",
+            "at": "2024-01-18T14:45:00Z"
+          }
+        }
+      ],
+      "createdAt": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "settings": {
+    "user": "alice",
+    "theme": "default",
+    "showIcons": true
+  }
+}
+```
+
+### Git Integration
+
+Since board data lives in your repository as JSON, standard Git workflows apply:
+
+- **Branching**: Create feature branches with board updates
+- **Merging**: Resolve conflicts manually or via merge strategies
+- **History**: Full audit trail of board evolution
+- **Synchronization**: Distribute board state across teams via `git push` and `git pull`
+
+## Customization
+
+### Themes
+
+Kanbee supports multiple color themes for different terminal environments and personal preferences. Configure the theme in your settings:
+
+```json
+{
+  "settings": {
+    "theme": "default"
+  }
+}
+```
+
+### Icons
+
+Customize visual indicators for columns and cards:
+
+- Column icons: `○ ◐ ● ◇ ◈ ◆ ◎ ▣ ⬡ ✦`
+- Card icons: `◇ ◈ ◆ ● ◎ ▣ ⬡ ✦ ⬢ ◉`
+
+### Labels and Colors
+
+Apply colored labels to cards for categorization and visual organization:
+
+- red, orange, yellow, green, blue, purple, pink
+
+## Development
+
+### Prerequisites
+
+- Node.js 14.0 or later
+- TypeScript 5.0 or later
+
+### Setup
+
+```bash
+git clone https://github.com/TheNeovimmer/kanbee.git
+cd kanbee
+npm install
+```
+
+### Build
+
+```bash
+npm run build
+```
+
+Output is generated in the `dist/` directory.
+
+### Development Mode
+
+Run TypeScript directly with ts-node:
+
+```bash
+npm run dev
+```
+
+### Project Structure
+
+```
+kanbee/
+├── src/
+│   ├── index.ts          # Entry point and CLI handler
+│   ├── input.ts          # Keyboard event parsing
+│   ├── renderer.ts       # Terminal rendering and UI output
+│   ├── storage.ts        # Data persistence and retrieval
+│   ├── theme.ts          # Color theme definitions
+│   ├── tui.ts            # Application state and mode management
+│   └── types.ts          # TypeScript type definitions
+├── dist/                 # Compiled JavaScript output
+├── data/
+│   └── boards.json       # Board state file
+├── package.json
+├── tsconfig.json
+└── README.md
+```
+
+## Contributing
+
+Contributions are welcome. Please review the [CONTRIBUTING.md](./CONTRIBUTING.md) file for guidelines on the development workflow, coding standards, and the pull request process.
+
+### Code Standards
+
+- Use TypeScript for all source files
+- Follow existing code style and conventions
+- Ensure all features are properly typed
+- Add tests for new functionality where applicable
+
+## License
+
+Kanbee is distributed under the MIT License. See the [LICENSE](./LICENSE) file for the full license text and terms.
+
+## Support
+
+For bug reports, feature requests, or general questions, please open an issue on the GitHub repository: [github.com/TheNeovimmer/kanbee](https://github.com/TheNeovimmer/kanbee)
+
+---
+
+Maintained by [TheNeovimmer](https://github.com/TheNeovimmer)
