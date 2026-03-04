@@ -46,20 +46,43 @@ export interface KanbeeData {
 }
 
 export const DEFAULT_COLUMNS: Column[] = [
-  { id: 'backlog', name: 'Backlog', icon: '○', order: 0 },
-  { id: 'in-progress', name: 'In Progress', icon: '◐', order: 1 },
-  { id: 'done', name: 'Done', icon: '●', order: 2 },
+  { id: "backlog", name: "Backlog", icon: "○", order: 0 },
+  { id: "in-progress", name: "In Progress", icon: "◐", order: 1 },
+  { id: "done", name: "Done", icon: "●", order: 2 },
 ];
 
-export const COLUMN_POSITION_ICONS: string[] = ['○', '◐', '●', '◇', '◈', '◆', '◎', '▣', '⬡', '✦'];
+export const COLUMN_POSITION_ICONS: string[] = [
+  "○",
+  "◐",
+  "●",
+  "◇",
+  "◈",
+  "◆",
+  "◎",
+  "▣",
+  "⬡",
+  "✦",
+];
 
-export const CARD_ICONS = ['◇', '◈', '◆', '●', '◎', '▣', '⬡', '✦', '⬢', '◉'];
+export const CARD_ICONS = ["◇", "◈", "◆", "●", "◎", "▣", "⬡", "✦", "⬢", "◉"];
 
 export const LABEL_COLORS = [
-  'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink',
+  "red",
+  "orange",
+  "yellow",
+  "green",
+  "blue",
+  "purple",
+  "pink",
 ];
 
-export type AppMode = 'NORMAL' | 'INSERT' | 'DETAIL' | 'PROMPT' | 'CONFIRM';
+export type AppMode =
+  | "NORMAL"
+  | "INSERT"
+  | "DETAIL"
+  | "PROMPT"
+  | "CONFIRM"
+  | "THEME_SELECT";
 
 export interface ThemeColors {
   primary: string;
@@ -97,4 +120,6 @@ export interface AppState {
   // Multi-step card creation
   creationStep: number;
   creationTitle: string;
+  // Theme selection state
+  themeSelectIndex: number;
 }
