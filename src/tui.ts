@@ -1,8 +1,16 @@
-import { AppState, AppMode, ThemeColors, Card, Column, CARD_ICONS, KanbeeData } from './types';
-import { parseKeypress, isPrintable } from './input';
-import { render, enterAltScreen, leaveAltScreen, hideCursor } from './renderer';
-import { getThemeColors } from './theme';
-import * as storage from './storage';
+import {
+  AppState,
+  AppMode,
+  ThemeColors,
+  Card,
+  Column,
+  CARD_ICONS,
+  KanbeeData,
+} from "./types";
+import { parseKeypress, isPrintable } from "./input";
+import { render, enterAltScreen, leaveAltScreen, hideCursor } from "./renderer";
+import { getThemeColors, getAvailableThemes, TerminalName } from "./theme";
+import * as storage from "./storage";
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -12,23 +20,24 @@ let theme: ThemeColors;
 function initState(data: KanbeeData): void {
   const board = data.boards[0];
   state = {
-    mode: 'NORMAL',
+    mode: "NORMAL",
     board,
     data,
     selectedCol: 0,
     selectedCard: 0,
-    promptText: '',
-    promptLabel: '',
+    promptText: "",
+    promptLabel: "",
     promptCallback: null,
-    confirmLabel: '',
+    confirmLabel: "",
     confirmCallback: null,
     detailField: 0,
     editingField: false,
-    editBuffer: '',
-    message: '',
+    editBuffer: "",
+    message: "",
     messageTimeout: null,
     creationStep: 0,
-    creationTitle: '',
+    creationTitle: "",
+    themeSelectIndex: 0,
   };
   theme = getThemeColors(data.settings.theme);
   clampSelection();
@@ -41,7 +50,7 @@ function getSortedColumns(): Column[] {
 }
 
 function getCardsInColumn(col: Column): Card[] {
-  return state.board.cards.filter(card => card.columnId === col.id);
+  return state.board.cards.filter((card) => card.columnId === col.id);
 }
 
 function clampSelection(): void {
@@ -53,14 +62,17 @@ function clampSelection(): void {
   }
   state.selectedCol = Math.max(0, Math.min(state.selectedCol, cols.length - 1));
   const cards = getCardsInColumn(cols[state.selectedCol]);
-  state.selectedCard = cards.length > 0 ? Math.max(0, Math.min(state.selectedCard, cards.length - 1)) : 0;
+  state.selectedCard =
+    cards.length > 0
+      ? Math.max(0, Math.min(state.selectedCard, cards.length - 1))
+      : 0;
 }
 
 function showMessage(msg: string): void {
   state.message = msg;
   if (state.messageTimeout) clearTimeout(state.messageTimeout);
   state.messageTimeout = setTimeout(() => {
-    state.message = '';
+    state.message = "";
     redraw();
   }, 2500);
 }
@@ -80,59 +92,97 @@ function selectedColumn(): Column | null {
 
 // ─── Prompt Helpers ───────────────────────────────────────────────────────────
 
-function enterPrompt(label: string, callback: (value: string) => void, initial = ''): void {
-  state.mode = 'PROMPT';
+function enterPrompt(
+  label: string,
+  callback: (value: string) => void,
+  initial = "",
+): void {
+  state.mode = "PROMPT";
   state.promptLabel = label;
   state.promptText = initial;
   state.promptCallback = callback;
 }
 
 function enterConfirm(label: string, callback: (yes: boolean) => void): void {
-  state.mode = 'CONFIRM';
+  state.mode = "CONFIRM";
   state.confirmLabel = label;
   state.confirmCallback = callback;
 }
 
 function exitPrompt(): void {
-  state.mode = 'NORMAL';
-  state.promptText = '';
-  state.promptLabel = '';
+  state.mode = "NORMAL";
+  state.promptText = "";
+  state.promptLabel = "";
   state.promptCallback = null;
   state.creationStep = 0;
-  state.creationTitle = '';
+  state.creationTitle = "";
 }
 
 function exitConfirm(): void {
-  state.mode = 'NORMAL';
-  state.confirmLabel = '';
+  state.mode = "NORMAL";
+  state.confirmLabel = "";
   state.confirmCallback = null;
 }
 
 // ─── Key Handlers by Mode ─────────────────────────────────────────────────────
+
+function handleThemeSelectKey(key: string): void {
+  const themes = getAvailableThemes();
+
+  switch (key) {
+    case "j":
+    case "down":
+      state.themeSelectIndex = (state.themeSelectIndex + 1) % themes.length;
+      break;
+    case "k":
+    case "up":
+      state.themeSelectIndex =
+        (state.themeSelectIndex - 1 + themes.length) % themes.length;
+      break;
+    case "return":
+    case " ": {
+      const selectedTheme = themes[state.themeSelectIndex];
+      state.data.settings.theme = selectedTheme;
+      storage.saveData(state.data);
+      theme = getThemeColors(selectedTheme);
+      state.mode = "NORMAL";
+      showMessage(`✓ Theme changed to ${selectedTheme}`);
+      break;
+    }
+    case "escape":
+    case "q":
+      state.mode = "NORMAL";
+      break;
+    case "C-c":
+      cleanup();
+      process.exit(0);
+      break;
+  }
+}
 
 function handleNormalKey(key: string): void {
   const cols = getSortedColumns();
 
   switch (key) {
     // ── Navigation ──
-    case 'h':
-    case 'left':
+    case "h":
+    case "left":
       if (state.selectedCol > 0) {
         state.selectedCol--;
         state.selectedCard = 0;
         clampSelection();
       }
       break;
-    case 'l':
-    case 'right':
+    case "l":
+    case "right":
       if (state.selectedCol < cols.length - 1) {
         state.selectedCol++;
         state.selectedCard = 0;
         clampSelection();
       }
       break;
-    case 'j':
-    case 'down': {
+    case "j":
+    case "down": {
       const col = cols[state.selectedCol];
       if (col) {
         const cards = getCardsInColumn(col);
@@ -142,66 +192,76 @@ function handleNormalKey(key: string): void {
       }
       break;
     }
-    case 'k':
-    case 'up':
+    case "k":
+    case "up":
       if (state.selectedCard > 0) {
         state.selectedCard--;
       }
       break;
 
     // ── Card actions ──
-    case 'n':
+    case "n":
       startCardCreation();
       break;
-    case 'return': {
+    case "return": {
       const card = selectedCard();
       if (card) openDetail();
       break;
     }
-    case 'd': {
+    case "d": {
       const card = selectedCard();
       if (card) {
         enterConfirm(`Delete "${card.title}"?`, (yes) => {
           if (yes) {
             storage.deleteCard(state.data, state.board.id, card.id);
             clampSelection();
-            showMessage('✓ Card deleted');
+            showMessage("✓ Card deleted");
           }
           exitConfirm();
         });
       }
       break;
     }
-    case 'm': {
+    case "m": {
       const card = selectedCard();
       if (card && cols.length > 1) {
-        const currentColIdx = cols.findIndex(c => c.id === card.columnId);
+        const currentColIdx = cols.findIndex((c) => c.id === card.columnId);
         if (currentColIdx < cols.length - 1) {
-          storage.moveCard(state.data, state.board.id, card.id, cols[currentColIdx + 1].id);
+          storage.moveCard(
+            state.data,
+            state.board.id,
+            card.id,
+            cols[currentColIdx + 1].id,
+          );
           state.selectedCol = currentColIdx + 1;
           clampSelection();
-          showMessage('→ Moved forward');
+          showMessage("→ Moved forward");
         }
       }
       break;
     }
-    case 'M': {
+    case "M": {
       const card = selectedCard();
       if (card && cols.length > 1) {
-        const currentColIdx = cols.findIndex(c => c.id === card.columnId);
+        const currentColIdx = cols.findIndex((c) => c.id === card.columnId);
         if (currentColIdx > 0) {
-          storage.moveCard(state.data, state.board.id, card.id, cols[currentColIdx - 1].id);
+          storage.moveCard(
+            state.data,
+            state.board.id,
+            card.id,
+            cols[currentColIdx - 1].id,
+          );
           state.selectedCol = currentColIdx - 1;
           clampSelection();
-          showMessage('← Moved back');
+          showMessage("← Moved back");
         }
       }
       break;
     }
 
     // ── Column actions ──
-    case 'A':
-      enterPrompt('New column name', (name) => {
+    case "A":
+      enterPrompt("New column name", (name) => {
         if (name.trim()) {
           storage.addColumn(state.data, state.board.id, name.trim());
           showMessage(`✓ Column "${name.trim()}" added`);
@@ -209,43 +269,64 @@ function handleNormalKey(key: string): void {
         exitPrompt();
       });
       break;
-    case 'R': {
+    case "R": {
       const col = selectedColumn();
       if (col) {
-        enterPrompt('Rename column', (name) => {
-          if (name.trim()) {
-            storage.renameColumn(state.data, state.board.id, col.id, name.trim());
-            showMessage(`✓ Column renamed to "${name.trim()}"`);
-          }
-          exitPrompt();
-        }, col.name);
+        enterPrompt(
+          "Rename column",
+          (name) => {
+            if (name.trim()) {
+              storage.renameColumn(
+                state.data,
+                state.board.id,
+                col.id,
+                name.trim(),
+              );
+              showMessage(`✓ Column renamed to "${name.trim()}"`);
+            }
+            exitPrompt();
+          },
+          col.name,
+        );
       }
       break;
     }
-    case 'X': {
+    case "X": {
       const col = selectedColumn();
       if (col && cols.length > 1) {
-        enterConfirm(`Delete column "${col.name}"? Cards will move to first column.`, (yes) => {
-          if (yes) {
-            storage.deleteColumn(state.data, state.board.id, col.id);
-            state.selectedCol = 0;
-            clampSelection();
-            showMessage('✓ Column deleted');
-          }
-          exitConfirm();
-        });
+        enterConfirm(
+          `Delete column "${col.name}"? Cards will move to first column.`,
+          (yes) => {
+            if (yes) {
+              storage.deleteColumn(state.data, state.board.id, col.id);
+              state.selectedCol = 0;
+              clampSelection();
+              showMessage("✓ Column deleted");
+            }
+            exitConfirm();
+          },
+        );
       } else if (cols.length <= 1) {
-        showMessage('Cannot delete the last column');
+        showMessage("Cannot delete the last column");
       }
       break;
     }
 
+    // ── Settings ──
+    case "t":
+      state.mode = "THEME_SELECT";
+      state.themeSelectIndex = getAvailableThemes().findIndex(
+        (t) => t === state.data.settings.theme,
+      );
+      if (state.themeSelectIndex < 0) state.themeSelectIndex = 0;
+      break;
+
     // ── Quit ──
-    case 'q':
+    case "q":
       cleanup();
       process.exit(0);
       break;
-    case 'C-c':
+    case "C-c":
       cleanup();
       process.exit(0);
       break;
@@ -254,22 +335,22 @@ function handleNormalKey(key: string): void {
 
 function handleDetailKey(key: string): void {
   switch (key) {
-    case 'tab':
+    case "tab":
       state.detailField = (state.detailField + 1) % 3;
       break;
-    case 'return':
-    case 'i':
+    case "return":
+    case "i":
       startFieldEdit();
       break;
-    case 'escape':
-      state.mode = 'NORMAL';
+    case "escape":
+      state.mode = "NORMAL";
       state.detailField = 0;
       break;
-    case 'q':
-      state.mode = 'NORMAL';
+    case "q":
+      state.mode = "NORMAL";
       state.detailField = 0;
       break;
-    case 'C-c':
+    case "C-c":
       cleanup();
       process.exit(0);
       break;
@@ -278,17 +359,17 @@ function handleDetailKey(key: string): void {
 
 function handleInsertKey(key: string): void {
   switch (key) {
-    case 'return':
+    case "return":
       saveFieldEdit();
       break;
-    case 'escape':
+    case "escape":
       state.editingField = false;
-      state.mode = 'DETAIL';
+      state.mode = "DETAIL";
       break;
-    case 'backspace':
+    case "backspace":
       state.editBuffer = state.editBuffer.slice(0, -1);
       break;
-    case 'C-c':
+    case "C-c":
       cleanup();
       process.exit(0);
       break;
@@ -302,18 +383,18 @@ function handleInsertKey(key: string): void {
 
 function handlePromptKey(key: string): void {
   switch (key) {
-    case 'return':
+    case "return":
       if (state.promptCallback) {
         state.promptCallback(state.promptText);
       }
       break;
-    case 'escape':
+    case "escape":
       exitPrompt();
       break;
-    case 'backspace':
+    case "backspace":
       state.promptText = state.promptText.slice(0, -1);
       break;
-    case 'C-c':
+    case "C-c":
       cleanup();
       process.exit(0);
       break;
@@ -327,17 +408,17 @@ function handlePromptKey(key: string): void {
 
 function handleConfirmKey(key: string): void {
   switch (key) {
-    case 'y':
-    case 'Y':
+    case "y":
+    case "Y":
       if (state.confirmCallback) state.confirmCallback(true);
       break;
-    case 'n':
-    case 'N':
-    case 'escape':
+    case "n":
+    case "N":
+    case "escape":
       if (state.confirmCallback) state.confirmCallback(false);
       else exitConfirm();
       break;
-    case 'C-c':
+    case "C-c":
       cleanup();
       process.exit(0);
       break;
@@ -348,18 +429,24 @@ function handleConfirmKey(key: string): void {
 
 function startCardCreation(): void {
   state.creationStep = 1;
-  enterPrompt('Card title', (title) => {
+  enterPrompt("Card title", (title) => {
     if (!title.trim()) {
       exitPrompt();
       return;
     }
     state.creationTitle = title.trim();
     state.creationStep = 2;
-    enterPrompt('Description (optional)', (desc) => {
+    enterPrompt("Description (optional)", (desc) => {
       const cols = getSortedColumns();
       const targetCol = cols[state.selectedCol];
       if (targetCol) {
-        storage.addCard(state.data, state.board.id, state.creationTitle, desc.trim(), targetCol.id);
+        storage.addCard(
+          state.data,
+          state.board.id,
+          state.creationTitle,
+          desc.trim(),
+          targetCol.id,
+        );
         clampSelection();
         showMessage(`✓ Card "${state.creationTitle}" created`);
       }
@@ -371,7 +458,7 @@ function startCardCreation(): void {
 // ─── Card Detail ──────────────────────────────────────────────────────────────
 
 function openDetail(): void {
-  state.mode = 'DETAIL';
+  state.mode = "DETAIL";
   state.detailField = 0;
   state.editingField = false;
 }
@@ -380,7 +467,7 @@ function startFieldEdit(): void {
   const card = selectedCard();
   if (!card) return;
 
-  state.mode = 'INSERT';
+  state.mode = "INSERT";
   state.editingField = true;
 
   switch (state.detailField) {
@@ -391,7 +478,7 @@ function startFieldEdit(): void {
       state.editBuffer = card.description;
       break;
     case 2: // icon
-      state.editBuffer = card.icon || '';
+      state.editBuffer = card.icon || "";
       break;
   }
 }
@@ -400,11 +487,11 @@ function saveFieldEdit(): void {
   const card = selectedCard();
   if (!card) {
     state.editingField = false;
-    state.mode = 'DETAIL';
+    state.mode = "DETAIL";
     return;
   }
 
-  const updates: Partial<Pick<Card, 'title' | 'description' | 'icon'>> = {};
+  const updates: Partial<Pick<Card, "title" | "description" | "icon">> = {};
   switch (state.detailField) {
     case 0:
       if (state.editBuffer.trim()) {
@@ -421,8 +508,8 @@ function saveFieldEdit(): void {
 
   storage.updateCard(state.data, state.board.id, card.id, updates);
   state.editingField = false;
-  state.mode = 'DETAIL';
-  showMessage('✓ Saved');
+  state.mode = "DETAIL";
+  showMessage("✓ Saved");
 }
 
 // ─── Render ───────────────────────────────────────────────────────────────────
@@ -450,16 +537,16 @@ export async function startTUI(data: KanbeeData): Promise<void> {
   hideCursor();
 
   // Handle resize
-  process.stdout.on('resize', () => redraw());
+  process.stdout.on("resize", () => redraw());
 
   // Handle exit signals
   const onExit = () => {
     cleanup();
     process.exit(0);
   };
-  process.on('SIGINT', onExit);
-  process.on('SIGTERM', onExit);
-  process.on('exit', () => {
+  process.on("SIGINT", onExit);
+  process.on("SIGTERM", onExit);
+  process.on("exit", () => {
     leaveAltScreen();
   });
 
@@ -471,25 +558,28 @@ export async function startTUI(data: KanbeeData): Promise<void> {
   process.stdin.resume();
 
   return new Promise<void>((resolve) => {
-    process.stdin.on('data', (buf: Buffer) => {
+    process.stdin.on("data", (buf: Buffer) => {
       const key = parseKeypress(buf);
       if (!key) return;
 
       switch (state.mode) {
-        case 'NORMAL':
+        case "NORMAL":
           handleNormalKey(key);
           break;
-        case 'DETAIL':
+        case "DETAIL":
           handleDetailKey(key);
           break;
-        case 'INSERT':
+        case "INSERT":
           handleInsertKey(key);
           break;
-        case 'PROMPT':
+        case "PROMPT":
           handlePromptKey(key);
           break;
-        case 'CONFIRM':
+        case "CONFIRM":
           handleConfirmKey(key);
+          break;
+        case "THEME_SELECT":
+          handleThemeSelectKey(key);
           break;
       }
 

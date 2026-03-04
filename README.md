@@ -210,6 +210,7 @@ kanbee push
 | `A` | Add new column to board |
 | `R` | Rename current column |
 | `X` | Delete current column (cards relocate to first column) |
+| `t` | Open theme selection menu |
 
 ### Edit and Navigation (Detail/Insert Modes)
 
@@ -219,6 +220,15 @@ kanbee push
 | `i` or `<Return>` | Enter insert mode to edit focused field |
 | `<Escape>` | Exit current mode (detail or insert) |
 | `<Backspace>` | Delete character (insert mode) |
+
+### Theme Selection
+
+| Binding | Action |
+|---------|--------|
+| `j` or `<Down>` | Move to next theme in list |
+| `k` or `<Up>` | Move to previous theme in list |
+| `<Return>` or `<Space>` | Apply selected theme |
+| `<Escape>` | Cancel theme selection |
 
 ### General
 
@@ -324,12 +334,29 @@ Since board data lives in your repository as JSON, standard Git workflows apply:
 
 ### Themes
 
-Kanbee supports multiple color themes for different terminal environments and personal preferences. Configure the theme in your settings:
+Kanbee supports multiple color themes optimized for different terminal emulators and personal preferences. Access the theme selector at any time by pressing `t` in normal mode.
+
+#### Available Themes
+
+- **default** — Default theme (Tokyonight-inspired)
+- **ghostty** — Optimized for Ghostty terminal
+- **iterm2** — Optimized for iTerm2 (Dracula-inspired)
+- **kitty** — Optimized for Kitty terminal
+- **wezterm** — Optimized for WezTerm
+- **alacritty** — Optimized for Alacritty (Catppuccin-inspired)
+
+The application automatically detects your terminal and applies a matching theme on first launch. You can override this selection at any time by pressing `t` to open the theme menu.
+
+#### Configuring Themes Programmatically
+
+To set a theme in your `~/.kanflow/data.json` settings:
 
 ```json
 {
   "settings": {
-    "theme": "default"
+    "user": "alice",
+    "theme": "alacritty",
+    "showIcons": true
   }
 }
 ```
@@ -340,6 +367,8 @@ Customize visual indicators for columns and cards:
 
 - Column icons: `○ ◐ ● ◇ ◈ ◆ ◎ ▣ ⬡ ✦`
 - Card icons: `◇ ◈ ◆ ● ◎ ▣ ⬡ ✦ ⬢ ◉`
+
+You can customize card icons when editing a card in detail mode. Simply edit the icon field and replace it with any single character.
 
 ### Labels and Colors
 
